@@ -1,21 +1,21 @@
-# 📈 Tesla (TSLA) Stock Price Prediction & Analytics Dashboard
+# Tesla Stock Analytics & Prediction Dashboard
 
-A state-of-the-art time-series analysis and forecasting dashboard powered by Deep Learning (**Recurrent Neural Networks (RNN)** and **Long Short-Term Memory (LSTM)** networks). The application features a premium dark-themed Streamlit UI, interactive Plotly visualizations, autoregressive forecasting, and custom dataset capabilities.
+[![Python Version](https://img.shields.io/badge/python-3.12%2B-blue)](https://www.python.org/)
+[![Framework](https://img.shields.io/badge/framework-Streamlit-red)](https://streamlit.io/)
+[![Deep Learning](https://img.shields.io/badge/library-TensorFlow%20%2F%20Keras-orange)](https://tensorflow.org/)
 
-> [!NOTE]
-> All models (RNN and LSTM) are pre-trained and saved under the `models/` directory. You can run the dashboard immediately or trigger training to overwrite the existing weights.
+A state-of-the-art visual analytics dashboard powered by Recurrent Neural Networks (RNN) and Long Short-Term Memory (LSTM) networks to analyze and forecast Tesla (TSLA) stock prices.
 
 ---
 
 ## 🌟 Key Features
 
-*   **Interactive Control Center:** Modify lookback windows (30–90 days) and forecast horizons (5–90 days) dynamically.
-*   **Dual Model Support & Comparison:** Evaluate both a standard **Simple RNN** and a stacked **LSTM (Recommended)** network. Compare metrics side by side.
-*   **Autoregressive Forecasting:** Predict future trading days iteratively by feeding predictions back into the model sequences.
-*   **Upload Custom Datasets:** Drag and drop any custom stock CSV file or use the built-in Tesla (TSLA) dataset.
-*   **Glassmorphic KPI Metrics:** Clear, real-time performance evaluation using **RMSE, MAE, MSE, and $R^2$ Score** cards.
-*   **Interactive Graphics:** Smooth, responsive Plotly charts representing historical trends, test-set prediction fits, trading volume distributions, and forecasted horizons.
-*   **Architecture Educational Panel:** Code snippets and architectural summaries detailing time-series sequence training.
+- **Interactive Control Center:** Configure lookback periods (30–90 days) and forecasting horizons (5–90 days) in real time.
+- **Deep Learning Predictions:** Compare predictions from a **Simple RNN** and a **Long Short-Term Memory (LSTM)** network.
+- **Autoregressive Forecasting:** Project future TSLA stock prices for custom horizons dynamically.
+- **Statistical Analytics & KPIs:** Track model metrics like Root Mean Squared Error (RMSE), Mean Absolute Error (MAE), and $R^2$ Score on interactive cards.
+- **Dataset Explorer:** Browse historical data summaries, raw datasets, and analyze trading volumes.
+- **Premium Glassmorphic UI:** Features custom dark mode CSS, subtle glowing animations, and responsive Plotly visual charts.
 
 ---
 
@@ -23,83 +23,112 @@ A state-of-the-art time-series analysis and forecasting dashboard powered by Dee
 
 ```text
 Tesla_Stock_Prediction/
-├── .venv/                     # Python Virtual Environment
-├── components/                # Custom React components (Aurora background framework)
-├── data/                      # Historical datasets
-│   └── TSLA.csv               # Default Tesla historical dataset
-├── models/                    # Serialized models & parameters
-│   ├── best_lstm.keras        # Trained LSTM Model
-│   ├── rnn_model.keras        # Trained Simple RNN Model
-│   └── scaler.pkl             # Pre-fit MinMaxScaler
-├── src/                       # Source modules
-│   ├── data_preprocessing.py  # Loading & cleaning CSV data
-│   ├── feature_engineering.py # Window sequencing helpers
-│   ├── train_rnn.py           # RNN architecture compile
-│   ├── train_lstm.py          # LSTM architecture compile
-│   ├── predict.py             # Evaluation metric calculations
-│   └── utils.py               # Miscellaneous utility helpers
-├── app.py                     # Main Streamlit web application
-├── main.py                    # Training orchestration script
-├── pyproject.toml             # Python project definition
-├── requirements.txt           # Standard pip package requirements
-└── README.md                  # Project Documentation (This File)
+├── .venv/                   # Virtual environment (ignored by Git)
+├── components/              # Modern UI components
+│   └── ui/
+│       ├── aurora-background.tsx
+│       └── demo.tsx
+├── data/
+│   └── TSLA.csv             # Historical Tesla stock dataset
+├── lib/
+│   └── utils.ts             # TS helper functions
+├── models/                  # Saved pre-trained models
+│   ├── best_lstm.keras      # Pre-trained LSTM weights
+│   ├── rnn_model.keras      # Pre-trained Simple RNN weights
+│   └── scaler.pkl           # MinMaxScaler state
+├── notebooks/
+│   └── analysis.ipynb       # Jupyter notebook for exploratory data analysis
+├── src/                     # Core python module code
+│   ├── data_preprocessing.py # Load, clean, and scale stock data
+│   ├── feature_engineering.py # Create temporal sliding window sequences
+│   ├── train_lstm.py        # LSTM neural network configuration
+│   ├── train_rnn.py         # Simple RNN neural network configuration
+│   ├── predict.py           # Evaluation helper (RMSE, MSE, R2)
+│   └── utils.ts
+├── app.py                   # Main Streamlit dashboard application
+├── main.py                  # Training pipeline coordinator script
+├── requirements.txt         # Core dependencies
+└── pyproject.toml           # Package configuration metadata
 ```
 
 ---
 
 ## 🧠 Model Architectures
 
-### 1. Stacked Long Short-Term Memory (LSTM)
-Designed to combat the vanishing gradient problem, the LSTM utilizes memory cell states and gates to capture long-term dependencies:
-*   **Layer 1:** LSTM (64 units, returning sequences)
-*   **Regularization:** Dropout (0.20)
-*   **Layer 2:** LSTM (64 units)
-*   **Regularization:** Dropout (0.20)
-*   **Output Layer:** Dense (1 unit, linear activation)
+### 1. Simple Recurrent Neural Network (RNN)
+Designed for lightweight and fast sequence modeling.
+- **Structure:**
+  - `SimpleRNN` layer (50 units, input window of 60 trading days)
+  - `Dropout` layer (rate = 0.2) to prevent overfitting
+  - `Dense` layer outputting 1 predicted stock price
 
-### 2. Simple Recurrent Neural Network (RNN)
-An agile network suitable for shorter-term sequences:
-*   **Layer 1:** SimpleRNN (50 units)
-*   **Regularization:** Dropout (0.20)
-*   **Output Layer:** Dense (1 unit, linear activation)
+### 2. Long Short-Term Memory (LSTM)
+Designed to combat the vanishing gradient problem and capture long-term trends.
+- **Structure:**
+  - `LSTM` layer (64 units, returning sequences)
+  - `Dropout` layer (rate = 0.2)
+  - `LSTM` layer (64 units)
+  - `Dropout` layer (rate = 0.2)
+  - `Dense` layer outputting 1 predicted stock price
 
 ---
 
-## 🚀 How to Run the Project
+## 🚀 Getting Started
 
-### Option A: Using the Virtual Environment (Recommended)
+### Prerequisites
+- Python `>= 3.12` installed.
 
-1. **Activate the virtual environment:**
-   ```powershell
-   .venv\Scripts\Activate.ps1
+### Setup Instructions
+
+1. **Clone the repository:**
+   ```bash
+   git clone https://github.com/chaithranarendrabhandarkar2004/Tesla_Stock_Prediction.git
+   cd Tesla_Stock_Prediction
    ```
-2. **Launch the dashboard:**
-   ```powershell
-   streamlit run app.py
+
+2. **Create and Activate Virtual Environment:**
+   * **Windows (PowerShell):**
+     ```powershell
+     python -m venv .venv
+     .venv\Scripts\Activate.ps1
+     ```
+   * **macOS / Linux:**
+     ```bash
+     python -m venv .venv
+     source .venv/bin/activate
+     ```
+
+3. **Install Dependencies:**
+   ```bash
+   pip install -r requirements.txt
    ```
 
-### Option B: Using the `uv` Tool
+---
 
-If you prefer using `uv` to orchestrate runs:
-```powershell
-uv run streamlit run app.py
+## 🏃 Run the Project
+
+### 1. Start the Dashboard UI
+Launch the interactive visual dashboard on localhost:
+```bash
+streamlit run app.py
 ```
 
-### Model Re-training (Optional)
-
-To retrain the models with fresh parameters or update the scaler:
-```powershell
-# Standard:
+### 2. Retrain Models
+To run the full training pipeline and save updated models/scalers to the `models/` directory:
+```bash
 python main.py
-
-# Using uv:
-uv run python main.py
 ```
 
 ---
 
-## 📊 Analytics Metrics Explained
+## ⚡ Optional: Run with `uv`
+If you have [uv](https://github.com/astral-sh/uv) installed, you can skip virtual environment management:
 
-*   **RMSE (Root Mean Squared Error):** Represents the standard deviation of residuals (prediction errors). Lower values indicate smaller errors in predicting dollar values.
-*   **MAE (Mean Absolute Error):** The average absolute difference between the actual and predicted price.
-*   **$R^2$ Score (Coefficient of Determination):** Explains how well the model predicts stock price variances. A score closer to `1.0` indicates a highly accurate regression fit.
+- **Launch Dashboard:**
+  ```bash
+  uv run streamlit run app.py
+  ```
+- **Train Models:**
+  ```bash
+  uv run python main.py
+  ```
