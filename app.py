@@ -9,7 +9,6 @@ from sklearn.preprocessing import MinMaxScaler
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 
-# Page config with a premium dark theme feel
 st.set_page_config(
     page_title="Tesla Stock Analytics & Prediction Dashboard",
     page_icon="📈",
@@ -17,10 +16,8 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# Custom premium CSS injection for beautiful UI styling
 st.markdown("""
     <style>
-    /* Main Layout Styling - Premium Animated Aurora Background */
     [data-testid="stAppViewContainer"], .stApp {
         background: #080710;
         position: relative;
@@ -54,13 +51,11 @@ st.markdown("""
         }
     }
 
-    /* Keep content on top of background */
     [data-testid="stHeader"], [data-testid="stSidebar"], .main .block-container {
         position: relative;
         z-index: 1;
     }
     
-    /* Modern Glassmorphism KPI Cards */
     .kpi-card {
         background: rgba(255, 255, 255, 0.03);
         border: 1px solid rgba(255, 255, 255, 0.1);
@@ -95,8 +90,7 @@ st.markdown("""
         font-size: 11px;
         color: #58a6ff;
     }
-    
-    /* Styling headers and buttons */
+   
     h1, h2, h3 {
         font-family: 'Outfit', 'Inter', sans-serif;
     }
@@ -108,7 +102,6 @@ st.markdown("""
         margin-bottom: 25px;
     }
     
-    /* Styled badges */
     .model-badge {
         background-color: #1e293b;
         color: #3b82f6;
@@ -123,7 +116,6 @@ st.markdown("""
     </style>
     """, unsafe_allow_html=True)
 
-# Helper function to create sequences
 def create_sequences(data, time_step=60):
     X = []
     y = []
@@ -132,7 +124,6 @@ def create_sequences(data, time_step=60):
         y.append(data[i + time_step])
     return np.array(X), np.array(y)
 
-# Load data on cache
 @st.cache_data
 def load_and_preprocess_data(file_path_or_uploaded):
     df = pd.read_csv(file_path_or_uploaded)
@@ -141,7 +132,6 @@ def load_and_preprocess_data(file_path_or_uploaded):
     df = df.ffill()
     return df
 
-# Main header
 st.markdown("""
     <div class="main-header">
         <span class="model-badge">Deep Learning Engine v1.0</span>
@@ -152,7 +142,6 @@ st.markdown("""
     </div>
     """, unsafe_allow_html=True)
 
-# Sidebar layout
 st.sidebar.markdown("""
     <div style="text-align: center; margin-bottom: 20px;">
         <h2 style="color: #ffffff; font-size: 20px; font-weight: 600;">Control Center</h2>
@@ -161,14 +150,12 @@ st.sidebar.markdown("""
     <hr style="border-color: rgba(255,255,255,0.1); margin-top: 0;"/>
 """, unsafe_allow_html=True)
 
-# File Uploader in sidebar
 uploaded_file = st.sidebar.file_uploader(
     "Upload Stock CSV Data",
     type=["csv"],
     help="Default Tesla stock data is loaded automatically if no file is uploaded."
 )
 
-# Load data
 default_data_path = "data/TSLA.csv"
 df = None
 
@@ -189,7 +176,6 @@ else:
         st.error("No dataset found! Please upload a valid CSV file.")
 
 if df is not None:
-    # Model Choice
     st.sidebar.subheader("Neural Network Configurations")
     selected_model_name = st.sidebar.selectbox(
         "Select Prediction Model",
@@ -204,7 +190,6 @@ if df is not None:
         help="Number of historical days the models look back to predict the next day's price."
     )
 
-    # Forecast Horizon
     st.sidebar.subheader("Future Forecasting Horizon")
     forecast_days = st.sidebar.slider(
         "Forecast Horizon (Days)",
@@ -214,7 +199,6 @@ if df is not None:
         help="Number of future trading days to predict iteratively."
     )
 
-    # Load scaler & models
     models_dir = "models"
     scaler_path = os.path.join(models_dir, "scaler.pkl")
     rnn_path = os.path.join(models_dir, "rnn_model.keras")
@@ -224,7 +208,6 @@ if df is not None:
     rnn_model = None
     lstm_model = None
 
-    # Load Scaler
     if os.path.exists(scaler_path):
         scaler = joblib.load(scaler_path)
     else:
@@ -232,7 +215,6 @@ if df is not None:
         scaler = MinMaxScaler()
         scaler.fit(df[["Close"]])
 
-    # Load Models
     try:
         if os.path.exists(rnn_path):
             rnn_model = tf.keras.models.load_model(rnn_path)
@@ -241,25 +223,19 @@ if df is not None:
     except Exception as e:
         st.error(f"Error loading models: {e}. Please ensure the models were trained correctly.")
 
-    # Data preprocessing for model predictions
     scaled_data = scaler.transform(df[["Close"]])
     X, y = create_sequences(scaled_data, time_step=time_step)
     
-    # Reshape input to [samples, time steps, features]
     X = X.reshape(X.shape[0], X.shape[1], 1)
     
-    # Split exactly the same way as main.py (shuffle=False, test_size=0.2)
     X_train, X_test, y_train, y_test = train_test_split(
         X, y, test_size=0.2, shuffle=False
     )
     
-    # Recover test dates for plotting
     dates_all = df.index[time_step:]
     train_len = len(y) - len(y_test)
     test_dates = dates_all[train_len:]
     
-    # Evaluate and display
-    # Tabs layout
     tab1, tab2, tab3, tab4 = st.tabs([
         "📊 Analytics & Predictions", 
         "🔮 Future Forecasting", 
@@ -269,18 +245,14 @@ if df is not None:
 
     with tab1:
         st.subheader("Test Set Performance & Model Comparison")
-        
-        # Predict using selected models
         predictions = {}
         metrics = {}
         
         if selected_model_name in ["Simple RNN", "Compare Models"] and rnn_model is not None:
-            # Simple RNN predicts
             rnn_pred_scaled = rnn_model.predict(X_test, verbose=0)
             rnn_pred = scaler.inverse_transform(rnn_pred_scaled)
             predictions["Simple RNN"] = rnn_pred
-            
-            # Metrics
+        
             y_test_inv = scaler.inverse_transform(y_test)
             mse = np.mean((y_test_inv - rnn_pred) ** 2)
             rmse = np.sqrt(mse)
@@ -291,12 +263,10 @@ if df is not None:
             metrics["Simple RNN"] = {"MSE": mse, "RMSE": rmse, "MAE": mae, "R2": r2}
 
         if selected_model_name in ["LSTM (Recommended)", "Compare Models"] and lstm_model is not None:
-            # LSTM predicts
             lstm_pred_scaled = lstm_model.predict(X_test, verbose=0)
             lstm_pred = scaler.inverse_transform(lstm_pred_scaled)
             predictions["LSTM"] = lstm_pred
             
-            # Metrics
             y_test_inv = scaler.inverse_transform(y_test)
             mse = np.mean((y_test_inv - lstm_pred) ** 2)
             rmse = np.sqrt(mse)
@@ -308,7 +278,6 @@ if df is not None:
 
         y_test_inv = scaler.inverse_transform(y_test)
 
-        # Render metric cards side by side
         if selected_model_name != "Compare Models":
             model_key = "LSTM" if "LSTM" in selected_model_name else "Simple RNN"
             if model_key in metrics:
@@ -347,7 +316,6 @@ if df is not None:
                         </div>
                     """, unsafe_allow_html=True)
         else:
-            # Display comparison table/side-by-side metrics
             col1, col2 = st.columns(2)
             for idx, model_key in enumerate(metrics.keys()):
                 m = metrics[model_key]
@@ -380,11 +348,9 @@ if df is not None:
         st.write("")
         st.write("")
 
-        # Plotly comparison graph
         st.subheader("Test Data Predictions vs Actual Prices")
         fig = go.Figure()
         
-        # Actual Line
         fig.add_trace(go.Scatter(
             x=test_dates, 
             y=y_test_inv.flatten(),
@@ -394,7 +360,6 @@ if df is not None:
             hoverlabel=dict(namelength=-1)
         ))
 
-        # Add predictions
         colors = {"Simple RNN": "#fbbf24", "LSTM": "#3b82f6"}
         for model_key, pred in predictions.items():
             fig.add_trace(go.Scatter(
@@ -439,7 +404,6 @@ if df is not None:
             This section forecasts the stock price of Tesla for the next **{forecast_days} trading days** by feeding the model's predictions back into itself iteratively.
         """)
 
-        # Select model for future forecasting
         forecast_model_choice = st.selectbox(
             "Select Forecasting Model",
             options=["LSTM", "Simple RNN"] if (lstm_model is not None and rnn_model is not None) else (["LSTM"] if lstm_model is not None else ["Simple RNN"])
@@ -455,29 +419,22 @@ if df is not None:
             future_predictions_scaled = []
             
             for _ in range(forecast_days):
-                # Predict next step
                 next_pred = active_model.predict(current_sequence, verbose=0)
                 future_predictions_scaled.append(next_pred[0, 0])
                 
-                # Update current sequence: append pred, drop first element
                 new_step = next_pred.reshape(1, 1, 1)
                 current_sequence = np.append(current_sequence[:, 1:, :], new_step, axis=1)
 
-            # Inverse scale predicted values
             future_predictions = scaler.inverse_transform(np.array(future_predictions_scaled).reshape(-1, 1))
 
-            # Create dates for forecasting
             last_date = df.index[-1]
             future_dates = pd.date_range(start=last_date + pd.Timedelta(days=1), periods=forecast_days, freq='B')
 
-            # Historical data to plot alongside (last 120 days of history)
             hist_days_to_show = 120
             hist_subset = df.iloc[-hist_days_to_show:]
             
-            # Forecast Plot
             fig_fc = go.Figure()
 
-            # Historical Line
             fig_fc.add_trace(go.Scatter(
                 x=hist_subset.index, 
                 y=hist_subset["Close"],
@@ -487,8 +444,6 @@ if df is not None:
                 hoverlabel=dict(namelength=-1)
             ))
 
-            # Forecast Line
-            # We prepend the last historical value to show a continuous line
             fc_dates_plot = [hist_subset.index[-1]] + list(future_dates)
             fc_values_plot = [hist_subset["Close"].iloc[-1]] + list(future_predictions.flatten())
 
@@ -530,7 +485,6 @@ if df is not None:
 
             st.plotly_chart(fig_fc, use_container_width=True)
 
-            # Display forecast table
             st.subheader("Forecasted Price List")
             fc_df = pd.DataFrame(
                 data=future_predictions,
@@ -539,7 +493,6 @@ if df is not None:
             )
             fc_df.index.name = "Date"
             
-            # Format and show columns
             st.dataframe(
                 fc_df.style.format("${:.2f}").background_gradient(cmap="Blues"),
                 use_container_width=True
@@ -550,7 +503,6 @@ if df is not None:
     with tab3:
         st.subheader("Tesla Dataset Overview")
         
-        # Metric columns of recent data
         latest_row = df.iloc[-1]
         prev_row = df.iloc[-2]
         change = latest_row["Close"] - prev_row["Close"]
@@ -582,7 +534,6 @@ if df is not None:
         st.write("")
         st.subheader("Data Head & Tail View")
         
-        # Tabs for Raw Data vs Describe
         sub_tab_1, sub_tab_2 = st.tabs(["📋 Data Preview", "📊 Statistical Summary"])
         
         with sub_tab_1:
@@ -615,7 +566,6 @@ if df is not None:
     with tab4:
         st.subheader("Understanding Deep Learning Models for Time-Series")
         
-        # Columns describing RNN vs LSTM
         col_rnn, col_lstm = st.columns(2)
         
         with col_rnn:
