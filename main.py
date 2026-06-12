@@ -42,9 +42,6 @@ X_train, X_test, y_train, y_test = train_test_split(
     test_size=0.2,
     shuffle=False
 )
-
-# RNN
-
 rnn = build_rnn()
 
 rnn.fit(
@@ -56,8 +53,6 @@ rnn.fit(
 )
 
 rnn.save("models/rnn_model.keras")
-
-# LSTM
 
 lstm = build_lstm()
 
