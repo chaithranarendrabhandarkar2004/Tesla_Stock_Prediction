@@ -412,7 +412,6 @@ if df is not None:
         active_model = lstm_model if forecast_model_choice == "LSTM" else rnn_model
 
         if active_model is not None:
-            # We take the last time_step days from df close price
             last_sequence = scaled_data[-time_step:]
             current_sequence = last_sequence.reshape(1, time_step, 1)
             
@@ -542,7 +541,6 @@ if df is not None:
         with sub_tab_2:
             st.dataframe(df.describe(), use_container_width=True)
 
-        # Volume distribution chart
         st.write("")
         st.subheader("Trading Volume Analysis")
         
